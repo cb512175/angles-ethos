@@ -28,7 +28,7 @@ main{padding:14px;max-width:720px;margin:0 auto;padding-bottom:80px}
 footer{position:fixed;bottom:0;left:0;right:0;background:#0d3b24;border-top:1px solid var(--line);display:flex;gap:6px;padding:8px;justify-content:center}
 footer a,footer button{font-size:12px;color:var(--steel);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;text-decoration:none}
 svg text{fill:var(--steel);font-size:10px}.legend span{font-size:12px;margin-right:10px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
-</style></head><body>
+.half{color:var(--gold);font-size:15px;margin:18px 4px 8px;border-bottom:2px solid var(--gold);padding-bottom:4px}.enote{margin-top:6px;font-size:13px}</style></head><body>
 <header><div class="brand"><b>Achievement</b>Equation • Prototype</div><h1>Angles <span>&amp;</span> Ethos</h1>
 <div class="who"><span class="muted">Viewing as</span><select id="userSel"></select></div><nav id="nav"></nav></header>
 <main id="app"></main><div class="toast" id="toast"></div>
@@ -40,7 +40,12 @@ const SCALE=[[-1,'Bad'],[0,'Average'],[1,'Good'],[2,'Excellent']];
 const uid=()=>Math.random().toString(36).slice(2,9);
 let S=load(); let tab=null; let draft={};
 function blank(){return{team:'My Team',users:[{id:'coach1',name:'Coach',role:'coach'}],ethos:['Ethos 1 (placeholder)','Ethos 2 (placeholder)','Ethos 3 (placeholder)','Ethos 4 (placeholder)','Ethos 5 (placeholder)'],angles:{tools:'Tools',technology:'Technology'},sessions:[],entries:[],others:[],me:'coach1'}}
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||blank()}catch(e){return blank()}}
+function migrate(d){const b=blank();if(!d||typeof d!=='object')return b;for(const k in b)if(d[k]==null)d[k]=b[k];if(!Array.isArray(d.ethos))d.ethos=b.ethos;while(d.ethos.length<5)d.ethos.push(b.ethos[d.ethos.length]);
+ ['users','sessions','entries','others'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});d.entries.forEach(e=>{if(!Array.isArray(e.ethos))e.ethos=[];if(!Array.isArray(e.ethosNotes))e.ethosNotes=[];if(!Array.isArray(e.techScores))e.techScores=[];e.factors=e.factors||{}});d.v=2;return d}
+function load(){try{return migrate(JSON.parse(localStorage.getItem(KEY)))}catch(e){return blank()}}
+const playerScore=e=>e?avg([avg(e.techScores||[]),e.selfPerf,e.selfVal]):null;
+const memberScore=e=>e?avg(e.ethos||[]):null;
+const totalScore=e=>{const p=playerScore(e),m=memberScore(e);return p==null||m==null?null:p+m};
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
 const me=()=>S.users.find(u=>u.id===S.me)||S.users[0];
@@ -75,17 +80,20 @@ log(){const ss=sorted().reverse();if(!ss.length)return `<div class="card"><h2>Lo
  return `<div class="card"><label style="margin-top:0">Session</label><select id="pickSess">${ss.map(s=>`<option value="${s.id}" ${s.id===x.id?'selected':''}>${s.date} · ${esc(s.tactic)}${s.type==='competition'?' (vs '+esc(s.opponent)+')':''}</option>`).join('')}</select>
  <p><span class="tag ${comp?'comp':''}">${comp?'Competition vs '+esc(x.opponent):'Practice'}</span> ${ex?'<span class="tag">Already logged — editing</span>':''}</p>
  <label>My focus for this session</label><input id="focus" value="${esc(d.focus)}" placeholder="What I'm working on today"></div>
+ <div class="card" style="border-color:var(--gold)"><h2>Session summary</h2><div class="row" style="text-align:center"><div><div class="big" id="sumP">${fmt(playerScore(d))}</div><span class="muted">Player (Angles)</span></div><div><div class="big" id="sumM">${fmt(memberScore(d))}</div><span class="muted">Member (Ethos)</span></div><div><div class="big" id="sumT">${fmt(totalScore(d))}</div><span class="muted">Combined</span></div></div><p class="muted">Player = avg of Tactics, Self Perf, Self Value. Member = avg of the 5 Ethos. Combined = Player + Member. <span class="ph">Formula is a placeholder</span></p></div>
+ <h2 class="half">Part A · As a Player <span class="muted">(Angles)</span></h2>
  <div class="card"><h2>1 · Tactics</h2><b>${esc(x.tactic)}</b><div class="row" style="margin-top:6px"><span class="muted">Score (avg of Techniques)</span><span class="big" id="tacScore">${fmt(tac)}</span></div></div>
  <div class="card"><h2>2 · Techniques</h2>${x.techniques.map((t,i)=>`<h3>${i+1}. ${esc(t)}</h3>${scaleHTML('t'+i,d.techScores[i],comp)}`).join('')}${comp?'<p class="muted">*Elite only exists in competition. <span class="ph">+3 is a placeholder value</span></p>':''}</div>
  <div class="card"><h2>3 · Teammates — Self</h2><h3>Performance (skill)</h3>${scaleHTML('sp',d.selfPerf,comp)}<h3>Value (encouraging, sacrificial, humble, true to the plan)</h3>${scaleHTML('sv',d.selfVal,comp)}<p class="muted">Captains / coach score you as "Others".</p></div>
  <div class="card"><h2>4 · ${esc(S.angles.tools)}</h2><p class="muted">Fundamental tools used (e.g. edges, stick, voice)</p><input id="tools" value="${esc(d.tools)}">
  <h2 style="margin-top:14px">5 · ${esc(S.angles.technology)}</h2><p class="muted">Non-essential enhancements (map &amp; compass = tools, GPS = technology)</p><input id="techno" value="${esc(d.tech)}"></div>
- <div class="card"><h2>Ethos check-in <span class="ph">Proposal · optional</span></h2><p class="muted">Off-ice principles. Cadence TBD — proposed per-session self check.</p>${S.ethos.map((e,i)=>`<h3>${esc(e)}</h3>${scaleHTML('e'+i,(d.ethos||[])[i],false)}`).join('')}</div>
- <div class="card"><h2>Additional Factors</h2><div class="row"><div><label>Sleep (hrs)</label><input type="number" step="0.5" id="f_sleepH" value="${f.sleepH??''}"></div><div><label>Sleep quality 1-5</label><input type="number" min="1" max="5" id="f_sleepQ" value="${f.sleepQ??''}"></div></div>
+ <h2 class="half">Part B · As a Teammate &amp; Member <span class="muted">(Ethos)</span></h2>
+ <div class="card"><h2>How I made my team &amp; organization better</h2><p class="muted">Required each session. Score all 5 (no Elite — Elite only exists vs an opponent).</p>${S.ethos.map((e,i)=>`<h3>${i+1}. ${esc(e)} ${/placeholder/i.test(e)?'<span class="ph">GM to supply</span>':''}</h3>${scaleHTML('e'+i,(d.ethos||[])[i],false)}<input class="enote" id="en${i}" value="${esc((d.ethosNotes||[])[i])}" placeholder="How I lived it (optional)">`).join('')}</div>
+ <h2 class="half">Additional Factors</h2><div class="card"><div class="row"><div><label>Sleep (hrs)</label><input type="number" step="0.5" id="f_sleepH" value="${f.sleepH??''}"></div><div><label>Sleep quality 1-5</label><input type="number" min="1" max="5" id="f_sleepQ" value="${f.sleepQ??''}"></div></div>
  <div class="row"><div><label>Nutrition 1-5</label><input type="number" min="1" max="5" id="f_nutr" value="${f.nutr??''}"></div><div><label>Hydration 1-5</label><input type="number" min="1" max="5" id="f_hyd" value="${f.hyd??''}"></div></div>
  <div class="row"><div><label>Soreness 1-5</label><input type="number" min="1" max="5" id="f_sore" value="${f.sore??''}"></div><div><label>Stress 1-5</label><input type="number" min="1" max="5" id="f_stress" value="${f.stress??''}"></div></div>
  <label>Meals / notes</label><textarea id="f_notes" rows="2">${esc(f.notes)}</textarea></div>
- <button class="btn" id="saveLog" style="width:100%">Save entry</button>`},
+ <button class="btn" id="saveLog" style="width:100%">Save session (Player + Member)</button>`},
 others(){const ss=sorted().reverse();if(!ss.length)return '<div class="card"><p class="muted">No sessions yet.</p></div>';
  if(!draft.osid||!sess(draft.osid))draft.osid=ss[0].id;const x=sess(draft.osid),comp=x.type==='competition';
  return `<div class="card"><h2>Score Others</h2><p class="muted">Rate each teammate on Performance and Value.</p><select id="pickO">${ss.map(s=>`<option value="${s.id}" ${s.id===x.id?'selected':''}>${s.date} · ${esc(s.tactic)}</option>`).join('')}</select></div>`+
@@ -101,7 +109,7 @@ ethos(){return `<div class="card"><h2>Ethos</h2><p class="muted">Five off-ice pr
 ethosv(){return `<div class="card"><h2>Our Ethos</h2>${S.ethos.map((e,i)=>`<div class="it" style="padding:8px 0;border-bottom:1px solid var(--line)"><b style="color:var(--gold)">${i+1}</b> ${esc(e)}</div>`).join('')}<p class="muted">Defined by your coach.</p></div>`}
 };
 function seriesFor(aid){return sorted().map(s=>{const e=S.entries.find(e=>e.sessionId===s.id&&e.athleteId===aid);const os=S.others.filter(o=>o.sessionId===s.id&&o.athleteId===aid);
- return{label:s.date.slice(5),comp:s.type==='competition',tac:e?avg(e.techScores):null,sp:e?.selfPerf??null,sv:e?.selfVal??null,op:avg(os.map(o=>o.perf)),ov:avg(os.map(o=>o.val)),eth:e?avg(e.ethos||[]):null,sleep:e?.factors?.sleepH??null}}).filter(p=>p.tac!=null||p.op!=null)}
+ return{label:s.date.slice(5),comp:s.type==='competition',tac:e?avg(e.techScores):null,sp:e?.selfPerf??null,sv:e?.selfVal??null,op:avg(os.map(o=>o.perf)),ov:avg(os.map(o=>o.val)),eth:memberScore(e),ply:playerScore(e),tot:totalScore(e),sleep:e?.factors?.sleepH??null}}).filter(p=>p.tac!=null||p.op!=null)}
 function chart(pts,lines,bar){if(!pts.length)return '<p class="muted">No data yet.</p>';const W=340,H=170,L=26,R=bar?24:6,T=8,B=20,iw=W-L-R,ih=H-T-B;const y=v=>T+ih*(1-(v+1)/4.2),x=i=>L+(pts.length<2?iw/2:iw*i/(pts.length-1));
  let g='';[-1,0,1,2,3].forEach(v=>g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#1e6b42" stroke-dasharray="${v===0?'':'2 3'}"/><text x="2" y="${y(v)+3}">${v>0?'+':''}${v}</text>`);
  if(bar){const by=v=>T+ih*(1-v/12);pts.forEach((p,i)=>{if(p[bar.k]!=null)g+=`<rect x="${x(i)-4}" y="${by(p[bar.k])}" width="8" height="${T+ih-by(p[bar.k])}" fill="${bar.c}" opacity=".35"/>`});g+=`<text x="${W-R+2}" y="${by(8)+3}">8h</text>`}
@@ -109,27 +117,28 @@ function chart(pts,lines,bar){if(!pts.length)return '<p class="muted">No data ye
  const step=Math.ceil(pts.length/6);pts.forEach((p,i)=>{if(i%step===0)g+=`<text x="${x(i)-10}" y="${H-5}">${p.label}</text>`});
  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${g}</svg><div class="legend">${lines.map(l=>`<span><i style="background:${l.c}"></i>${l.n}</span>`).join('')}${bar?`<span><i style="background:${bar.c};opacity:.5"></i>${bar.n}</span>`:''}</div>`}
 function trendView(aid){const a=S.users.find(u=>u.id===aid);const p=seriesFor(aid);const last=k=>avg(p.slice(-5).map(x=>x[k]));
- return `<div class="card"><h2>${esc(a?.name)} — last 5</h2><div class="row" style="text-align:center"><div><div class="big">${fmt(last('tac'))}</div><span class="muted">Tactics</span></div><div><div class="big">${fmt(last('sp'))}</div><span class="muted">Self Perf</span></div><div><div class="big">${fmt(last('ov'))}</div><span class="muted">Others Value</span></div></div></div>
+ return `<div class="card"><h2>${esc(a?.name)} — last 5</h2><div class="row" style="text-align:center"><div><div class="big">${fmt(last('ply'))}</div><span class="muted">Player</span></div><div><div class="big">${fmt(last('eth'))}</div><span class="muted">Member</span></div><div><div class="big">${fmt(last('tot'))}</div><span class="muted">Combined</span></div></div></div>
+ <div class="card"><h2>Player vs Member</h2>${chart(p,[{k:'ply',c:'#d4af37',n:'Player (Angles)'},{k:'eth',c:'#ffffff',n:'Member (Ethos)'}])}</div>
  <div class="card"><h2>Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4af37',n:'Tactics'}],{k:'sleep',c:'#b9cdbf',n:'Sleep hrs'})}</div>
  <div class="card"><h2>Teammates — Self</h2>${chart(p,[{k:'sp',c:'#2fae66',n:'Self Perf'},{k:'sv',c:'#4caf7a',n:'Self Value'}])}</div>
  <div class="card"><h2>Teammates — Others</h2>${chart(p,[{k:'op',c:'#e07a5f',n:'Others Perf'},{k:'ov',c:'#ffffff',n:'Others Value'}])}</div>
- <div class="card"><h2>Ethos <span class="ph">Proposal</span></h2>${chart(p,[{k:'eth',c:'#d4af37',n:'Ethos avg'}])}<p class="muted">Larger dots = competition.</p></div>`}
+ <p class="muted" style="text-align:center">Larger dots = competition.</p>`}
 function teamView(){const as=athletes();const p=sorted().map(s=>{const es=S.entries.filter(e=>e.sessionId===s.id);const os=S.others.filter(o=>o.sessionId===s.id);
- return{label:s.date.slice(5),comp:s.type==='competition',tac:avg(es.map(e=>avg(e.techScores))),sv:avg(es.map(e=>e.selfVal)),ov:avg(os.map(o=>o.val)),sleep:avg(es.map(e=>e.factors?.sleepH))}}).filter(x=>x.tac!=null);
- const rows=as.map(a=>{const q=seriesFor(a.id).slice(-5);return{a,t:avg(q.map(x=>x.tac)),o:avg(q.map(x=>x.ov)),n:S.entries.filter(e=>e.athleteId===a.id).length}}).sort((x,y)=>(y.t??-9)-(x.t??-9));
- return `<div class="card"><h2>Team Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4af37',n:'Team Tactics'},{k:'ov',c:'#ffffff',n:'Others Value'}],{k:'sleep',c:'#b9cdbf',n:'Avg sleep'})}</div>
- <div class="card"><h2>Athletes (last 5)</h2><div class="list">${rows.map(r=>`<div class="it"><span>${esc(r.a.name)} <span class="muted">${r.n} logs</span></span><span>Tac <b style="color:var(--gold)">${fmt(r.t)}</b> · Val <b>${fmt(r.o)}</b></span></div>`).join('')}</div></div>`}
+ return{label:s.date.slice(5),comp:s.type==='competition',tac:avg(es.map(e=>avg(e.techScores))),sv:avg(es.map(e=>e.selfVal)),ov:avg(os.map(o=>o.val)),sleep:avg(es.map(e=>e.factors?.sleepH)),ply:avg(es.map(playerScore)),eth:avg(es.map(memberScore))}}).filter(x=>x.tac!=null);
+ const rows=as.map(a=>{const q=seriesFor(a.id).slice(-5);return{a,t:avg(q.map(x=>x.tac)),o:avg(q.map(x=>x.ov)),p:avg(q.map(x=>x.ply)),m:avg(q.map(x=>x.eth)),tt:avg(q.map(x=>x.tot)),n:S.entries.filter(e=>e.athleteId===a.id).length}}).sort((x,y)=>(y.tt??-9)-(x.tt??-9));
+ return `<div class="card"><h2>Team: Player vs Member</h2>${chart(p,[{k:'ply',c:'#d4af37',n:'Player (Angles)'},{k:'eth',c:'#ffffff',n:'Member (Ethos)'}])}</div><div class="card"><h2>Team Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4af37',n:'Team Tactics'},{k:'ov',c:'#ffffff',n:'Others Value'}],{k:'sleep',c:'#b9cdbf',n:'Avg sleep'})}</div>
+ <div class="card"><h2>Leaderboard (last 5, by Combined)</h2><div class="list">${rows.map(r=>`<div class="it"><span>${esc(r.a.name)} <span class="muted">${r.n} logs</span></span><span>Ply <b style="color:var(--gold)">${fmt(r.p)}</b> · Mem <b>${fmt(r.m)}</b> · Σ <b style="color:var(--gold)">${fmt(r.tt)}</b></span></div>`).join('')}</div></div>`}
 // events
 document.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
  if(b.dataset.tab){tab=b.dataset.tab;draft={};render();return}
  if(b.dataset.k){const k=b.dataset.k,v=+b.dataset.v;
   if(tab==='others'){const[t,aid]=k.split('|');let o=S.others.find(o=>o.sessionId===draft.osid&&o.athleteId===aid&&o.raterId===S.me);if(!o){o={sessionId:draft.osid,athleteId:aid,raterId:S.me};S.others.push(o)}o[t==='op'?'perf':'val']=v;save();b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));toast('Saved');return}
   grab();if(k[0]==='t')draft.techScores[+k.slice(1)]=v;else if(k==='sp')draft.selfPerf=v;else if(k==='sv')draft.selfVal=v;else if(k[0]==='e'){draft.ethos=draft.ethos||[];draft.ethos[+k.slice(1)]=v}
-  b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));const t=document.getElementById('tacScore');if(t)t.textContent=fmt(avg(draft.techScores));return}
+  b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));const t=document.getElementById('tacScore');if(t)t.textContent=fmt(avg(draft.techScores));const g=id=>document.getElementById(id);if(g('sumP')){g('sumP').textContent=fmt(playerScore(draft));g('sumM').textContent=fmt(memberScore(draft));g('sumT').textContent=fmt(totalScore(draft))}return}
  if(b.id==='addSess'){const t=document.getElementById('sTac').value.trim(),te=document.getElementById('sTech').value.split('\n').map(s=>s.trim()).filter(Boolean);if(!t||!te.length)return toast('Add a Tactic and Techniques');
   S.sessions.push({id:uid(),date:document.getElementById('sDate').value,type:document.getElementById('sType').value,opponent:document.getElementById('sOpp').value,tactic:t,techniques:te});save();render();toast('Session created')}
- if(b.id==='saveLog'){grab();const x=sess(draft.sid);if((draft.techScores||[]).filter(v=>v!=null).length<x.techniques.length)return toast('Score every Technique');
-  const e={sessionId:draft.sid,athleteId:S.me,focus:draft.focus,techScores:draft.techScores,selfPerf:draft.selfPerf,selfVal:draft.selfVal,tools:draft.tools,tech:draft.tech,ethos:draft.ethos||[],factors:draft.factors};
+ if(b.id==='saveLog'){grab();const x=sess(draft.sid);if((draft.techScores||[]).filter(v=>v!=null).length<x.techniques.length)return toast('Score every Technique');if(draft.selfPerf==null||draft.selfVal==null)return toast('Score Self Performance and Value');if(S.ethos.some((_,i)=>(draft.ethos||[])[i]==null))return toast('Score all 5 Ethos');
+  const e={sessionId:draft.sid,athleteId:S.me,focus:draft.focus,techScores:draft.techScores,selfPerf:draft.selfPerf,selfVal:draft.selfVal,tools:draft.tools,tech:draft.tech,ethos:draft.ethos||[],ethosNotes:draft.ethosNotes||[],factors:draft.factors};
   S.entries=S.entries.filter(q=>!(q.sessionId===e.sessionId&&q.athleteId===e.athleteId));S.entries.push(e);save();toast('Entry saved');draft={sid:draft.sid};render()}
  if(b.id==='addU'){const n=document.getElementById('nName').value.trim();if(!n)return;S.users.push({id:uid(),name:n,number:document.getElementById('nNum').value,role:'athlete'});save();render()}
  if(b.dataset.del){S.users=S.users.filter(u=>u.id!==b.dataset.del);save();render()}
@@ -138,7 +147,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b
  if(b.id==='resetBtn'){if(confirm('Erase all data?')){S=blank();save();tab=null;draft={};render()}}
 });
 function grab(){const g=id=>document.getElementById(id);if(!g('focus'))return;draft.focus=g('focus').value;draft.tools=g('tools').value;draft.tech=g('techno').value;
- const n=id=>g(id).value===''?null:+g(id).value;draft.factors={sleepH:n('f_sleepH'),sleepQ:n('f_sleepQ'),nutr:n('f_nutr'),hyd:n('f_hyd'),sore:n('f_sore'),stress:n('f_stress'),notes:g('f_notes').value};draft.techScores=draft.techScores||[]}
+ const n=id=>g(id).value===''?null:+g(id).value;draft.factors={sleepH:n('f_sleepH'),sleepQ:n('f_sleepQ'),nutr:n('f_nutr'),hyd:n('f_hyd'),sore:n('f_sore'),stress:n('f_stress'),notes:g('f_notes').value};draft.techScores=draft.techScores||[];draft.ethosNotes=S.ethos.map((_,i)=>g('en'+i)?g('en'+i).value:'')}
 document.addEventListener('change',ev=>{const t=ev.target;
  if(t.id==='userSel'){S.me=t.value;save();draft={};render()}
  if(t.id==='pickSess'){draft={sid:t.value};render()}
@@ -158,7 +167,7 @@ function demo(){const D=blank();D.team='Stars Elite 19U (demo)';
  for(let d=0;d<14;d++){const dt=new Date(start);dt.setDate(start.getDate()+d*2.5|0);const comp=d%4===3;const t=T[d%T.length];
   const s={id:'s'+d,date:dt.toISOString().slice(0,10),type:comp?'competition':'practice',opponent:comp?opps[(d/4|0)%4]:'',tactic:t[0],techniques:t[1]};D.sessions.push(s);
   D.users.filter(u=>u.role!=='coach').forEach((u,i)=>{if(rnd()<.1)return;const sleep=Math.round((6+rnd()*3.5)*2)/2;const base=(sleep-7.5)*.5+d*.05+(i===0?.3:0);
-   D.entries.push({sessionId:s.id,athleteId:u.id,focus:['Quick feet on retrieval','Communicate early','Win puck battles','Stick on puck'][(i+d)%4],techScores:t[1].map(()=>sc(base+.4,comp)),selfPerf:sc(base+.3,comp),selfVal:sc(base+.6,comp),tools:'Edges, stick, voice',tech:rnd()>.5?'Video review app':'',ethos:D.ethos.map(()=>sc(.8,false)),factors:{sleepH:sleep,sleepQ:1+Math.round(rnd()*4),nutr:2+Math.round(rnd()*3),hyd:2+Math.round(rnd()*3),sore:1+Math.round(rnd()*4),stress:1+Math.round(rnd()*4),notes:'Pasta + chicken pre-game'}});
+   D.entries.push({sessionId:s.id,athleteId:u.id,focus:['Quick feet on retrieval','Communicate early','Win puck battles','Stick on puck'][(i+d)%4],techScores:t[1].map(()=>sc(base+.4,comp)),selfPerf:sc(base+.3,comp),selfVal:sc(base+.6,comp),tools:'Edges, stick, voice',tech:rnd()>.5?'Video review app':'',ethos:D.ethos.map(()=>sc(.8,false)),ethosNotes:D.ethos.map((_,k)=>k===0&&rnd()>.6?'Helped carry gear / picked up teammates':''),factors:{sleepH:sleep,sleepQ:1+Math.round(rnd()*4),nutr:2+Math.round(rnd()*3),hyd:2+Math.round(rnd()*3),sore:1+Math.round(rnd()*4),stress:1+Math.round(rnd()*4),notes:'Pasta + chicken pre-game'}});
    ['a1','a2','coach1'].filter(x=>x!==u.id).forEach(rid=>{if(rnd()<.5)D.others.push({sessionId:s.id,athleteId:u.id,raterId:rid,perf:sc(base+.2,comp),val:sc(base+.7,comp)})})})}
  D.me='coach1';return D}
 render();
