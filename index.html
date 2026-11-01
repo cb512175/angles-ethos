@@ -149,7 +149,7 @@ document.addEventListener('change',ev=>{const t=ev.target;
  if(t.id==='aTools'){S.angles.tools=t.value||'Tools';save()}if(t.id==='aTech'){S.angles.technology=t.value||'Technology';save()}
 });
 function demo(){const D=blank();D.team='Stars Elite 19U (demo)';
- const names=[['Sutton',17,'athlete'],['Avery Lind',4,'captain'],['Jo Marchetti',22,'captain'],['Riley Okafor',9,'athlete'],['Kenzie Hart',11,'athlete'],['Morgan Pike',27,'athlete'],['Tess Varga',31,'athlete'],['Quinn Dubois',6,'athlete']];
+ const names=[['Button',17,'athlete'],['Avery Lind',4,'captain'],['Jo Marchetti',22,'captain'],['Riley Okafor',9,'athlete'],['Kenzie Hart',11,'athlete'],['Morgan Pike',27,'athlete'],['Tess Varga',31,'athlete'],['Quinn Dubois',6,'athlete']];
  D.users=[{id:'coach1',name:'Coach Reyes (sample)',role:'coach'},...names.map(([n,num,r],i)=>({id:'a'+i,name:n,number:num,role:r}))];
  const T=[['Breakout — strong-side up',['D retrieves with speed','Shoulder check before touch','Hard pass to strong-side wing','Center supports low']],['1-2-2 Forecheck',['F1 angles to boards','F2 reads and supports','D pinch on cue','Stick in lane']],['Power play — umbrella',['Win the entry','Point walks the line','Bumper finds soft ice','Net-front screen']],['Penalty kill — box',['Stay compact','Pressure on bobble','Clear to glass']],['D-zone coverage',['Man in front','Low cycle switch','Weak-side stick on ice']]];
  const opps=['Lakeshore Lynx','North Ridge Wolves','Capital Blades','Prairie Storm'];let r=7;const rnd=()=>{r=(r*9301+49297)%233280;return r/233280};
