@@ -57,13 +57,17 @@ const sess=id=>S.sessions.find(s=>s.id===id);
 const sorted=()=>[...S.sessions].sort((a,b)=>a.date.localeCompare(b.date));
 function scaleHTML(key,val,comp){let h=SCALE.map(([v,l])=>`<button data-k="${key}" data-v="${v}" class="${val===v?'on':''}"><b>${v>0?'+':''}${v}</b>${l}</button>`).join('');
  if(comp)h+=`<button data-k="${key}" data-v="${ELITE}" class="elite ${val===ELITE?'on':''}"><b>+${ELITE}</b>Elite*</button>`;return `<div class="scale">${h}</div>`}
-function tabsFor(r){return r==='coach'?[['sessions','Sessions'],['others','Score Others'],['team','Team Trends'],['roster','Roster'],['ethos','Ethos']]:r==='captain'?[['log','Log Session'],['others','Score Others'],['trends','My Trends'],['ethosv','Ethos']]:[['log','Log Session'],['trends','My Trends'],['ethosv','Ethos']]}
+function tabsFor(r){return r==='coach'?[['sessions','Sessions'],['others','Score Others'],['team','Trends'],['roster','Roster']]:r==='captain'?[['log','Sessions'],['others','Score Others'],['trends','Trends']]:[['log','Sessions'],['trends','Trends']]}
 function render(){
  const us=document.getElementById('userSel');us.innerHTML=['coach','captain','athlete'].map(r=>`<optgroup label="${r[0].toUpperCase()+r.slice(1)}">`+S.users.filter(u=>u.role===r).map(u=>`<option value="${u.id}" ${u.id===S.me?'selected':''}>${esc(u.name)}${u.number?' #'+u.number:''}</option>`).join('')+'</optgroup>').join('');
  const tabs=tabsFor(me().role);if(!tabs.find(t=>t[0]===tab))tab=tabs[0][0];
  document.getElementById('nav').innerHTML=tabs.map(([k,l])=>`<button data-tab="${k}" class="${k===tab?'on':''}">${l}</button>`).join('');
  document.getElementById('app').innerHTML=(V[tab]||(()=>''))();after[tab]&&after[tab]();
 }
+function aeRef(edit){const A=[['Tactics','The play, plan or process. Scored from your Techniques.'],['Techniques','The steps that execute the plan. Each one is scored.'],['Teammates','Self and Others, on Performance (skill) and Value (encouraging, sacrificial, humble, on-plan).'],[S.angles.tools||'Tools','The fundamentals you use to execute.'],[S.angles.technology||'Technology','Enhancements to the tools (map & compass = tools, GPS = technology).']];
+return `<div class="card" style="border-color:var(--gold)"><h2>Angles &amp; Ethos</h2><p class="muted">Every session is scored on both: how I performed as a player, and how I made my team and organization better.</p>
+<h3 style="color:var(--gold)">The 5 Angles · As a Player</h3>${A.map((a,i)=>`<div class="it" style="padding:6px 0;border-bottom:1px solid var(--line);display:block"><b style="color:var(--gold)">${i+1}</b> <b>${esc(a[0])}</b><br><span class="muted">${esc(a[1])}</span></div>`).join('')}
+<h3 style="color:var(--gold);margin-top:14px">The 5 Ethos Pillars · As a Member</h3>${edit?S.ethos.map((e,i)=>`<label>Pillar ${i+1}</label><input data-eth="${i}" value="${esc(e)}">`).join('')+'<p><button class="btn sm" id="saveEth">Save Ethos Pillars</button></p>':S.ethos.map((e,i)=>`<div class="it" style="padding:6px 0;border-bottom:1px solid var(--line)"><b style="color:var(--gold)">${i+1}</b> ${esc(e)}</div>`).join('')}</div>`}
 const after={};
 const V={
 sessions(){const s=sorted().reverse();return `<div class="card"><h2>New Session</h2><p class="muted">Coach sets the Tactic and its Techniques for each session.</p>
@@ -72,12 +76,12 @@ sessions(){const s=sorted().reverse();return `<div class="card"><h2>New Session<
 <label>Tactic (play / plan / process)</label><input id="sTac" placeholder="e.g. Breakout — strong-side up">
 <label>Techniques (one step per line)</label><textarea id="sTech" rows="4" placeholder="D retrieves puck&#10;Shoulder check&#10;Pass to strong-side wing"></textarea>
 <p><button class="btn" id="addSess">Create session</button></p></div>
-<div class="card"><h2>Sessions (${s.length})</h2><div class="list">${s.map(x=>`<div class="it"><div><b>${esc(x.tactic)}</b><br><span class="muted">${x.date} · ${x.techniques.length} techniques · ${S.entries.filter(e=>e.sessionId===x.id).length}/${athletes().length} logged</span></div><span class="tag ${x.type==='competition'?'comp':''}">${x.type==='competition'?'vs '+esc(x.opponent||'Opp'):'Practice'}</span></div>`).join('')||'<p class="muted">No sessions yet.</p>'}</div></div>`},
+${aeRef(true)}<div class="card"><h2>Sessions (${s.length})</h2><div class="list">${s.map(x=>`<div class="it"><div><b>${esc(x.tactic)}</b><br><span class="muted">${x.date} · ${x.techniques.length} techniques · ${S.entries.filter(e=>e.sessionId===x.id).length}/${athletes().length} logged</span></div><span class="tag ${x.type==='competition'?'comp':''}">${x.type==='competition'?'vs '+esc(x.opponent||'Opp'):'Practice'}</span></div>`).join('')||'<p class="muted">No sessions yet.</p>'}</div></div>`},
 log(){const ss=sorted().reverse();if(!ss.length)return `<div class="card"><h2>Log Session</h2><p class="muted">No sessions yet — your coach creates them.</p></div>`;
  if(!draft.sid||!sess(draft.sid))draft={sid:ss[0].id};const x=sess(draft.sid),comp=x.type==='competition';
  const ex=S.entries.find(e=>e.sessionId===x.id&&e.athleteId===S.me);if(!draft.loaded){Object.assign(draft,ex?JSON.parse(JSON.stringify(ex)):{techScores:[],ethos:[],factors:{}},{loaded:1,sid:x.id})}
  const d=draft,f=d.factors||{};const tac=avg(d.techScores||[]);
- return `<div class="card"><label style="margin-top:0">Session</label><select id="pickSess">${ss.map(s=>`<option value="${s.id}" ${s.id===x.id?'selected':''}>${s.date} · ${esc(s.tactic)}${s.type==='competition'?' (vs '+esc(s.opponent)+')':''}</option>`).join('')}</select>
+ return aeRef(false)+`<div class="card"><label style="margin-top:0">Session</label><select id="pickSess">${ss.map(s=>`<option value="${s.id}" ${s.id===x.id?'selected':''}>${s.date} · ${esc(s.tactic)}${s.type==='competition'?' (vs '+esc(s.opponent)+')':''}</option>`).join('')}</select>
  <p><span class="tag ${comp?'comp':''}">${comp?'Competition vs '+esc(x.opponent):'Practice'}</span> ${ex?'<span class="tag">Already logged — editing</span>':''}</p>
  <label>My focus for this session</label><input id="focus" value="${esc(d.focus)}" placeholder="What I'm working on today"></div>
  <div class="card" style="border-color:var(--gold)"><h2>Session summary</h2><div class="row" style="text-align:center"><div><div class="big" id="sumP">${fmt(playerScore(d))}</div><span class="muted">Player (Angles)</span></div><div><div class="big" id="sumM">${fmt(memberScore(d))}</div><span class="muted">Member (Ethos)</span></div><div><div class="big" id="sumT">${fmt(totalScore(d))}</div><span class="muted">Combined</span></div></div><p class="muted">Player = avg of Tactics, Self Perf, Self Value. Member = avg of the 5 Ethos. Combined = Player + Member. <span class="ph">Formula is a placeholder</span></p></div>
