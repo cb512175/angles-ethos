@@ -135,7 +135,7 @@ function trendView(aid){const a=S.users.find(u=>u.id===aid);const p=seriesFor(ai
  <div class="card"><h2>Player vs Member</h2>${chart(p,[{k:'ply',c:'#d4af37',n:'Player (Angles)'},{k:'eth',c:'#ffffff',n:'Member (Ethos)'}])}</div>
  <div class="card"><h2>Me vs My Gear</h2>${chart(p,[{k:'tac',c:'#d4af37',n:'Techniques/Tactics'},{k:'gear',c:'#2fae66',n:'Gear score'}])}</div>${gearCard(aid)}
  <div class="card"><h2>Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4af37',n:'Tactics'}],{k:'sleep',c:'#b9cdbf',n:'Sleep hrs'})}</div>
- <div class="card"><h2>Teammates — Self</h2>${chart(p,[{k:'sp',c:'#2fae66',n:'Self Perf'},{k:'sv',c:'#4caf7a',n:'Self Value'}])}</div>
+ <div class="card"><h2>Teammates — Self</h2>${chart(p,[{k:'sp',c:'#d4af37',n:'Self Perf'},{k:'sv',c:'#ffffff',n:'Self Value'}])}</div>
  <div class="card"><h2>Teammates — Others</h2>${chart(p,[{k:'op',c:'#e07a5f',n:'Others Perf'},{k:'ov',c:'#ffffff',n:'Others Value'}])}</div>
  <p class="muted" style="text-align:center">Larger dots = competition.</p>`}
 function teamView(){const as=athletes();const p=sorted().map(s=>{const es=S.entries.filter(e=>e.sessionId===s.id);const os=S.others.filter(o=>o.sessionId===s.id);
