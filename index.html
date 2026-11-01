@@ -1,9 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AchievementEquation • Angles &amp; Ethos</title>
 <style>
-:root{--navy:#0b1a2e;--navy2:#12263f;--steel:#8a9bb0;--line:#24405f;--gold:#d4a73a;--txt:#e8edf3;--bad:#d9534f;--good:#4caf7a}
+:root{--navy:#0a0a0a;--navy2:#10241a;--steel:#b9cdbf;--line:#1e6b42;--gold:#d4af37;--txt:#ffffff;--bad:#d9534f;--good:#4caf7a}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--navy);color:var(--txt)}
-header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#081322,#0b1a2e);border-bottom:2px solid var(--gold);padding:10px 14px}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#0d3b24,#0a0a0a);border-bottom:2px solid var(--gold);padding:10px 14px}
 .brand{font-size:11px;letter-spacing:.18em;color:var(--steel);text-transform:uppercase}.brand b{color:var(--gold)}
 h1{margin:2px 0 6px;font-size:20px;letter-spacing:.02em}h1 span{color:var(--gold)}
 .who{display:flex;gap:6px;align-items:center;flex-wrap:wrap}select,input,textarea{background:var(--navy2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:15px;width:100%}
@@ -17,7 +17,7 @@ main{padding:14px;max-width:720px;margin:0 auto;padding-bottom:80px}
 .btn{background:var(--gold);color:var(--navy);border:0;border-radius:8px;padding:10px 14px;font-weight:700;font-size:15px;cursor:pointer}
 .btn.sec{background:none;color:var(--txt);border:1px solid var(--steel)}.btn.sm{padding:6px 10px;font-size:13px}
 .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
-.scale{display:flex;gap:4px;flex-wrap:wrap}.scale button{flex:1;min-width:52px;padding:8px 2px;border-radius:8px;border:1px solid var(--line);background:#0e2036;color:var(--txt);font-size:12px}
+.scale{display:flex;gap:4px;flex-wrap:wrap}.scale button{flex:1;min-width:52px;padding:8px 2px;border-radius:8px;border:1px solid var(--line);background:#0f2d1e;color:var(--txt);font-size:12px}
 .scale button b{display:block;font-size:15px}.scale button.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}
 .scale button.elite{border-color:var(--gold)}
 .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid var(--steel);color:var(--steel)}
@@ -25,7 +25,7 @@ main{padding:14px;max-width:720px;margin:0 auto;padding-bottom:80px}
 .muted{color:var(--steel);font-size:13px}.big{font-size:28px;font-weight:800;color:var(--gold)}
 .list .it{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);padding:10px 16px;border-radius:20px;font-weight:700;display:none}
-footer{position:fixed;bottom:0;left:0;right:0;background:#081322;border-top:1px solid var(--line);display:flex;gap:6px;padding:8px;justify-content:center}
+footer{position:fixed;bottom:0;left:0;right:0;background:#0d3b24;border-top:1px solid var(--line);display:flex;gap:6px;padding:8px;justify-content:center}
 footer a,footer button{font-size:12px;color:var(--steel);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;text-decoration:none}
 svg text{fill:var(--steel);font-size:10px}.legend span{font-size:12px;margin-right:10px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
 </style></head><body>
@@ -103,21 +103,21 @@ ethosv(){return `<div class="card"><h2>Our Ethos</h2>${S.ethos.map((e,i)=>`<div 
 function seriesFor(aid){return sorted().map(s=>{const e=S.entries.find(e=>e.sessionId===s.id&&e.athleteId===aid);const os=S.others.filter(o=>o.sessionId===s.id&&o.athleteId===aid);
  return{label:s.date.slice(5),comp:s.type==='competition',tac:e?avg(e.techScores):null,sp:e?.selfPerf??null,sv:e?.selfVal??null,op:avg(os.map(o=>o.perf)),ov:avg(os.map(o=>o.val)),eth:e?avg(e.ethos||[]):null,sleep:e?.factors?.sleepH??null}}).filter(p=>p.tac!=null||p.op!=null)}
 function chart(pts,lines,bar){if(!pts.length)return '<p class="muted">No data yet.</p>';const W=340,H=170,L=26,R=bar?24:6,T=8,B=20,iw=W-L-R,ih=H-T-B;const y=v=>T+ih*(1-(v+1)/4.2),x=i=>L+(pts.length<2?iw/2:iw*i/(pts.length-1));
- let g='';[-1,0,1,2,3].forEach(v=>g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#24405f" stroke-dasharray="${v===0?'':'2 3'}"/><text x="2" y="${y(v)+3}">${v>0?'+':''}${v}</text>`);
+ let g='';[-1,0,1,2,3].forEach(v=>g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#1e6b42" stroke-dasharray="${v===0?'':'2 3'}"/><text x="2" y="${y(v)+3}">${v>0?'+':''}${v}</text>`);
  if(bar){const by=v=>T+ih*(1-v/12);pts.forEach((p,i)=>{if(p[bar.k]!=null)g+=`<rect x="${x(i)-4}" y="${by(p[bar.k])}" width="8" height="${T+ih-by(p[bar.k])}" fill="${bar.c}" opacity=".35"/>`});g+=`<text x="${W-R+2}" y="${by(8)+3}">8h</text>`}
  lines.forEach(l=>{let d='';pts.forEach((p,i)=>{if(p[l.k]!=null)d+=(d?'L':'M')+x(i).toFixed(1)+','+y(p[l.k]).toFixed(1)});g+=`<path d="${d}" fill="none" stroke="${l.c}" stroke-width="2"/>`;pts.forEach((p,i)=>{if(p[l.k]!=null)g+=`<circle cx="${x(i)}" cy="${y(p[l.k])}" r="${p.comp?3.5:2.2}" fill="${l.c}"/>`})});
  const step=Math.ceil(pts.length/6);pts.forEach((p,i)=>{if(i%step===0)g+=`<text x="${x(i)-10}" y="${H-5}">${p.label}</text>`});
  return `<svg viewBox="0 0 ${W} ${H}" width="100%">${g}</svg><div class="legend">${lines.map(l=>`<span><i style="background:${l.c}"></i>${l.n}</span>`).join('')}${bar?`<span><i style="background:${bar.c};opacity:.5"></i>${bar.n}</span>`:''}</div>`}
 function trendView(aid){const a=S.users.find(u=>u.id===aid);const p=seriesFor(aid);const last=k=>avg(p.slice(-5).map(x=>x[k]));
  return `<div class="card"><h2>${esc(a?.name)} — last 5</h2><div class="row" style="text-align:center"><div><div class="big">${fmt(last('tac'))}</div><span class="muted">Tactics</span></div><div><div class="big">${fmt(last('sp'))}</div><span class="muted">Self Perf</span></div><div><div class="big">${fmt(last('ov'))}</div><span class="muted">Others Value</span></div></div></div>
- <div class="card"><h2>Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4a73a',n:'Tactics'}],{k:'sleep',c:'#8a9bb0',n:'Sleep hrs'})}</div>
- <div class="card"><h2>Teammates — Self</h2>${chart(p,[{k:'sp',c:'#5aa9e6',n:'Self Perf'},{k:'sv',c:'#4caf7a',n:'Self Value'}])}</div>
- <div class="card"><h2>Teammates — Others</h2>${chart(p,[{k:'op',c:'#e07a5f',n:'Others Perf'},{k:'ov',c:'#c39bd3',n:'Others Value'}])}</div>
- <div class="card"><h2>Ethos <span class="ph">Proposal</span></h2>${chart(p,[{k:'eth',c:'#d4a73a',n:'Ethos avg'}])}<p class="muted">Larger dots = competition.</p></div>`}
+ <div class="card"><h2>Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4af37',n:'Tactics'}],{k:'sleep',c:'#b9cdbf',n:'Sleep hrs'})}</div>
+ <div class="card"><h2>Teammates — Self</h2>${chart(p,[{k:'sp',c:'#2fae66',n:'Self Perf'},{k:'sv',c:'#4caf7a',n:'Self Value'}])}</div>
+ <div class="card"><h2>Teammates — Others</h2>${chart(p,[{k:'op',c:'#e07a5f',n:'Others Perf'},{k:'ov',c:'#ffffff',n:'Others Value'}])}</div>
+ <div class="card"><h2>Ethos <span class="ph">Proposal</span></h2>${chart(p,[{k:'eth',c:'#d4af37',n:'Ethos avg'}])}<p class="muted">Larger dots = competition.</p></div>`}
 function teamView(){const as=athletes();const p=sorted().map(s=>{const es=S.entries.filter(e=>e.sessionId===s.id);const os=S.others.filter(o=>o.sessionId===s.id);
  return{label:s.date.slice(5),comp:s.type==='competition',tac:avg(es.map(e=>avg(e.techScores))),sv:avg(es.map(e=>e.selfVal)),ov:avg(os.map(o=>o.val)),sleep:avg(es.map(e=>e.factors?.sleepH))}}).filter(x=>x.tac!=null);
  const rows=as.map(a=>{const q=seriesFor(a.id).slice(-5);return{a,t:avg(q.map(x=>x.tac)),o:avg(q.map(x=>x.ov)),n:S.entries.filter(e=>e.athleteId===a.id).length}}).sort((x,y)=>(y.t??-9)-(x.t??-9));
- return `<div class="card"><h2>Team Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4a73a',n:'Team Tactics'},{k:'ov',c:'#c39bd3',n:'Others Value'}],{k:'sleep',c:'#8a9bb0',n:'Avg sleep'})}</div>
+ return `<div class="card"><h2>Team Tactics vs Sleep</h2>${chart(p,[{k:'tac',c:'#d4af37',n:'Team Tactics'},{k:'ov',c:'#ffffff',n:'Others Value'}],{k:'sleep',c:'#b9cdbf',n:'Avg sleep'})}</div>
  <div class="card"><h2>Athletes (last 5)</h2><div class="list">${rows.map(r=>`<div class="it"><span>${esc(r.a.name)} <span class="muted">${r.n} logs</span></span><span>Tac <b style="color:var(--gold)">${fmt(r.t)}</b> · Val <b>${fmt(r.o)}</b></span></div>`).join('')}</div></div>`}
 // events
 document.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
